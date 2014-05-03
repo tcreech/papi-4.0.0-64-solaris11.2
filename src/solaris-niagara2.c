@@ -1157,8 +1157,24 @@ _niagara2_read (hwd_context_t * ctx, hwd_control_state_t * ctrl,
   for (i = 0; i < ctrl->count; i++)
     {
       /* Retrieve the counting results of libcpc */
-      __CHECK_ERR_DFLT (cpc_buf_get (cpc, ctrl->counter_buffer, ctrl->idx[i],
-				     &ctrl->result[i]));
+      int ret = cpc_buf_get (cpc, ctrl->counter_buffer, ctrl->idx[i],
+				     &ctrl->result[i]);
+      if(ret < 0)
+      {
+#ifdef SYNTHETIC_EVENTS_SUPPORTED
+        // Ignore this failure if this was a synthetic event. It might be more
+        // appropriate to simply not not call cpc_buf_get in this case, but I'm
+        // not confident I fully understand all implications of skipping the
+        // call. For some reason Solaris 11.1 didn't fail here but 11.2 does.
+        // It seems Oracle's made some changes to libcpc.
+        const int syn_barrier = _niagara2_vector.cmp_info.num_native_events
+          - __t2_store.syn_evt_count;
+        if (!ctrl->code[i].event_code >= syn_barrier)
+#endif
+        {
+          __CHECK_ERR_DFLT(ret);
+        }
+      }
 
       /* As libcpc uses uint64_t and PAPI uses int64_t, we need to normalize
          the result back to a value that PAPI can handle, otherwise the result

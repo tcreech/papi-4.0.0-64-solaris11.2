@@ -1192,6 +1192,10 @@ if test "$OS" = "solaris"; then
             if(CPC_VER_CURRENT == 2)
             {
                 exit(0);
+            }else
+            {
+                // Also accept libcpc 3 (Solaris 11.2)
+                exit(0);
             }
 
             exit(1);
