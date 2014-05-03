@@ -7,7 +7,7 @@
 
 /* 
 * File:    papi_protos.h
-* CVS:     $Id: papi_protos.h,v 1.69 2009/12/18 20:24:24 terpstra Exp $
+* CVS:     $Id: papi_protos.h,v 1.69.2.1 2010/04/29 02:32:15 terpstra Exp $
 * Author:  Philip Mucci
 *          mucci@cs.utk.edu
 * Mods:    Haihang You
@@ -229,7 +229,7 @@ void _papi_hwd_dispatch_timer(int signal, hwd_siginfo_t * info, void *tmp);
 /* papi_internal.c global papi error function */
 void PAPIERROR(char *format, ...);
 
-#if (!defined(HAVE_FFSLL) || defined(_BGP))
+#if (!defined(HAVE_FFSLL) || defined(__bgp__))
  int ffsll(long long lli);
 #endif
 

@@ -4,7 +4,7 @@
 
 /* 
 * File:    papi.h
-* CVS:     $Id: papi.h,v 1.193 2010/01/13 15:40:49 terpstra Exp $
+* CVS:     $Id: papi.h,v 1.193.2.2 2010/04/29 02:32:15 terpstra Exp $
 * Author:  Philip Mucci
 *          mucci@cs.utk.edu
 * Mods:    dan terpstra
@@ -36,8 +36,8 @@
 #define PAPI_VERSION_INCREMENT(x)((x)          & 0xff)
 
 /* This is the official PAPI version */
-/* Big increment for PAPI-C technology pre-release */
-#define PAPI_VERSION  			PAPI_VERSION_NUMBER(4,0,0,0)
+/* The final digit represents the patch count */
+#define PAPI_VERSION  			PAPI_VERSION_NUMBER(4,0,0,3)
 #define PAPI_VER_CURRENT 		(PAPI_VERSION & 0xffff0000)
 
 #ifdef __cplusplus
@@ -646,7 +646,7 @@ read the documentation carefully.  */
 */
 /* MAX_TERMS is the current max value of MAX_COUNTER_TERMS as defined in SUBSTRATEs */
 /* This definition also is HORRIBLE and should be replaced by a dynamic value. -pjm */
-#ifdef _BGP
+#ifdef __bgp__
 #define PAPI_MAX_INFO_TERMS  19 /* should match PAPI_MAX_COUNTER_TERMS defined in papi_internal.h */
 #else
 #define PAPI_MAX_INFO_TERMS 12

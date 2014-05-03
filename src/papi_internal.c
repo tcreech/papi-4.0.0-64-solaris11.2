@@ -4,7 +4,7 @@
 
 /* 
 * File:    papi_internal.c
-* CVS:     $Id: papi_internal.c,v 1.138 2010/01/13 18:39:05 terpstra Exp $
+* CVS:     $Id: papi_internal.c,v 1.138.2.1 2010/03/08 22:08:09 terpstra Exp $
 * Author:  Philip Mucci
 *          mucci@cs.utk.edu
 * Mods:    dan terpstra
@@ -580,6 +580,22 @@ static int add_native_fail_clean(EventSetInfo_t * ESI, int nevt)
    return -1;
 }
 
+/* since update_control_state trashes overflow settings, this puts things
+   back into balance. */
+static int update_overflow(EventSetInfo_t * ESI)
+{
+	int i, retval = PAPI_OK;
+
+	if (ESI->overflow.flags & PAPI_OVERFLOW_HARDWARE) {
+		for (i=0; i<ESI->overflow.event_counter; i++) {
+			retval = _papi_hwd[ESI->CmpIdx]->set_overflow(ESI, 
+				ESI->overflow.EventIndex[i], ESI->overflow.threshold[i]);
+			if (retval != PAPI_OK) break;
+		}
+	}
+	return (retval);
+}
+
 /* this function is called by _papi_hwi_add_event when adding native events 
 nix: pointer to array of native event table indexes from the preset entry
 size: number of native events to add
@@ -771,6 +787,8 @@ int _papi_hwi_add_event(EventSetInfo_t * ESI, int EventCode)
 
    /* Bump the number of events */
    ESI->NumberOfEvents++;
+	/* reinstate the overflows if any */
+	update_overflow( ESI );
 
    return (retval);
 }
@@ -875,14 +893,14 @@ int remove_native_events(EventSetInfo_t * ESI, int *nevt, int size)
    /* If we removed any elements, 
       clear the now empty slots, reinitialize the index, and update the count.
       Then send the info down to the substrate to update the hwd control structure. */
+   retval = PAPI_OK;
    if (zero) {
       retval = _papi_hwd[ESI->CmpIdx]->update_control_state(ESI->ctl_state, native, ESI->NativeCount,
 		ESI->master->context[ESI->CmpIdx]);
-      if (retval != PAPI_OK)
-         return (retval);
+      if (retval == PAPI_OK)
+         retval = update_overflow(ESI);
    }
-
-   return (PAPI_OK);
+   return (retval);
 }
 
 int _papi_hwi_remove_event(EventSetInfo_t * ESI, int EventCode)

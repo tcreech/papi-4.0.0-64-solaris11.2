@@ -4,7 +4,7 @@
 
 /* 
 * File:    papi_internal.h
-* CVS:     $Id: papi_internal.h,v 1.181 2009/12/18 20:24:24 terpstra Exp $
+* CVS:     $Id: papi_internal.h,v 1.181.2.1 2010/04/29 02:32:15 terpstra Exp $
 * Author:  Philip Mucci
 *          mucci@cs.utk.edu
 * Mods:    dan terpstra
@@ -166,7 +166,7 @@ extern int papi_num_components;
     Now it's defined globally as 8 for everything. Mainly applies to max terms in
     derived events.
 */
-#ifdef _BGP
+#ifdef __bgp__
 #define PAPI_MAX_COUNTER_TERMS	19
 #else
 #define PAPI_MAX_COUNTER_TERMS	8

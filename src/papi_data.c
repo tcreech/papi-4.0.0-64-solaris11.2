@@ -4,7 +4,7 @@
 
 /* 
 * File:    papi_data.c
-* CVS:     $Id: papi_data.c,v 1.35 2009/12/18 20:24:24 terpstra Exp $
+* CVS:     $Id: papi_data.c,v 1.35.2.1 2010/04/29 02:32:15 terpstra Exp $
 * Author:  Philip Mucci
 *          mucci@cs.utk.edu
 * Mods:    dan terpstra
@@ -178,7 +178,7 @@ const hwi_preset_info_t _papi_hwi_preset_info[PAPI_MAX_PRESET_EVENTS] = {
    /*109*/ {"PAPI_BGL_TS_FULL", "Torus no token UPC cycles", "BGL special event: Torus no token UPC cycles"}, 
    /*110*/ {"PAPI_BGL_TR_DPKT", "Tree 256 byte packets", "BGL special event: Tree 256 byte packets"},
    /*111*/ {"PAPI_BGL_TR_FULL", "UPC cycles (CLOCKx2) tree rcv is full", "BGL special event: UPC cycles (CLOCKx2) tree rcv is full"},
-#elif defined (_BGP)
+#elif defined (__bgp__)
    /*107*/ {"PAPI_BGL_TS_32B", "Torus 32B chunks sent", "BGL special event: Torus 32B chunks sent"},
    /*108*/ {"PAPI_BGL_TR_DPKT", "Tree 256 byte packets", "BGL special event: Tree 256 byte packets"},
    /*109*/ {NULL, NULL, NULL},
@@ -324,7 +324,7 @@ const unsigned int _papi_hwi_preset_type[] = {
    /*109: PAPI_BGL_TS_FULL */  PAPI_PRESET_BIT_MSC, 
    /*110: PAPI_BGL_TR_DPKT */  PAPI_PRESET_BIT_MSC,
    /*111: PAPI_BGL_TR_FULL */  PAPI_PRESET_BIT_MSC,
-#elif defined (_BGP)
+#elif defined (__bgp__)
    /*107: PAPI_BGL_TS_32B */  PAPI_PRESET_BIT_MSC,
    /*108: PAPI_BGL_TR_DPKT */  PAPI_PRESET_BIT_MSC,
    /*109*/ 0,

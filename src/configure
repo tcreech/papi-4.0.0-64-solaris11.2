@@ -1981,6 +1981,7 @@ use_shared=yes
 use_static=yes
 use_static_tests=no
 use_x86_cache_info=no
+distributed_build=no
 { $as_echo "$as_me:$LINENO: checking for architecture" >&5
 $as_echo_n "checking for architecture... " >&6; }
 
@@ -2093,6 +2094,10 @@ $as_echo_n "checking for CPU type... " >&6; }
 # Check whether --with-CPU was given.
 if test "${with_CPU+set}" = set; then
   withval=$with_CPU; CPU=$withval
+             case "$CPU" in
+               core | core2 | i7 | atom | p4 | p3 | opteron | athlon)
+                 use_x86_cache_info=yes;;
+             esac
 else
 
 
@@ -2113,7 +2118,6 @@ case "$OS" in
            made=GenuineIntel
            family="`cat /proc/cpuinfo | grep family | cut -d: -f2 | cut -d' ' -f2 | sed '2,$d'`"
            model="`cat /proc/cpuinfo | grep model | cut -d: -f2 | cut -d' ' -f2 | sed '2,$d'`"
-           # family 15 is always P4; model 1 is vanilla pre-HT, model 2 is vanilla; model 3 is em64t, 4 is Pentium D, 6 is Xeon D
            if test "$family" = "6"; then
              # model 14 is an ancient Core
              if test "$model" = "14"; then
@@ -2125,8 +2129,9 @@ case "$OS" in
                CPU=core2
                use_x86_cache_info=yes
              fi
-             # model 26 is Nehalem
-             if test "$model" = "26"; then
+             # models 26, 30, 37, 44, 46 are Nehalem variants
+             if (test "$model" = "26" || test "$model" = "30" || test "$model" = "37" ||
+                 test "$model" = "44" || test "$model" = "46"); then
                CPU=i7
                use_x86_cache_info=yes
              fi
@@ -2135,14 +2140,10 @@ case "$OS" in
                CPU=atom
                use_x86_cache_info=yes
              fi
+           # family 15 is always P4
            elif test "$family" = "15"; then
-             if (test "$model" = "3" || test "$model" = "4" || test "$model" = "6"); then
-               CPU=em64t
-               use_x86_cache_info=yes
-             elif (test "$model" = "1" || test "$model" = "2"); then
                CPU=p4
                use_x86_cache_info=yes
-             fi
            elif test "$family" = "32"; then
 	       CPU=montecito
 	   elif test "$family" = "31"; then
@@ -2157,7 +2158,8 @@ case "$OS" in
              elif test "`cat /proc/cpuinfo | grep -i "Pentium III"`" != ""; then
                CPU=p3
                use_x86_cache_info=yes
-	     else CPU=p3
+	     else
+               CPU=p3
                use_x86_cache_info=yes
              fi
            fi
@@ -6615,6 +6617,7 @@ if test "x$perfctr" = "x"; then
 # Check whether --with-perfctr was given.
 if test "${with_perfctr+set}" = set; then
   withval=$with_perfctr; perfctr=$withval
+             distributed_build=yes
 else
   perfctr="no"
 if test "$cross_compiling" = "no" ; then
@@ -6697,6 +6700,7 @@ esac
 # Check whether --with-perfctr_root was given.
 if test "${with_perfctr_root+set}" = set; then
   withval=$with_perfctr_root; perfctr_root=$withval
+             distributed_build=yes
 else
   perfctr_root=""
 
@@ -6706,6 +6710,7 @@ fi
 # Check whether --with-perfctr_prefix was given.
 if test "${with_perfctr_prefix+set}" = set; then
   withval=$with_perfctr_prefix; perfctr_prefix=$withval
+             distributed_build=yes
 else
   perfctr_prefix=""
 
@@ -6715,6 +6720,7 @@ fi
 # Check whether --with-perfctr_incdir was given.
 if test "${with_perfctr_incdir+set}" = set; then
   withval=$with_perfctr_incdir; perfctr_incdir=$withval
+            distributed_build=yes
 else
   perfctr_incdir=""
 
@@ -6724,6 +6730,7 @@ fi
 # Check whether --with-perfctr_libdir was given.
 if test "${with_perfctr_libdir+set}" = set; then
   withval=$with_perfctr_libdir; perfctr_libdir=$withval
+            distributed_build=yes
 else
   perfctr_libdir=""
 
@@ -6734,6 +6741,7 @@ fi
 # Check whether --with-perfmon was given.
 if test "${with_perfmon+set}" = set; then
   withval=$with_perfmon; perfmon=$withval
+             distributed_build=yes
 else
   perfmon=0
 	    if test "$cross_compiling" = "no" ; then
@@ -6819,6 +6827,7 @@ fi
 # Check whether --with-pfm_root was given.
 if test "${with_pfm_root+set}" = set; then
   withval=$with_pfm_root; pfm_root=$withval
+            distributed_build=yes
 else
   pfm_root=""
 
@@ -6828,6 +6837,7 @@ fi
 # Check whether --with-pfm_prefix was given.
 if test "${with_pfm_prefix+set}" = set; then
   withval=$with_pfm_prefix; pfm_prefix=$withval
+            distributed_build=yes
 else
   pfm_prefix=""
 
@@ -6837,6 +6847,7 @@ fi
 # Check whether --with-pfm_incdir was given.
 if test "${with_pfm_incdir+set}" = set; then
   withval=$with_pfm_incdir; pfm_incdir=$withval
+            distributed_build=yes
 else
   pfm_incdir=""
 
@@ -6846,6 +6857,7 @@ fi
 # Check whether --with-pfm_libdir was given.
 if test "${with_pfm_libdir+set}" = set; then
   withval=$with_pfm_libdir; pfm_libdir=$withval
+            distributed_build=yes
 else
   pfm_libdir=""
 
@@ -7019,7 +7031,7 @@ fi
 fi
 # Linux perf event end
 
-if test "$perf_events" = "no" -a "$perfctr" = "no" -a "$perfmon" = "0"; then
+if test "$distributed_build" = "no" -a "$perf_events" = "no" -a "$perfctr" = "no" -a "$perfmon" = "0"; then
   { { $as_echo "$as_me:$LINENO: error: No performance monitoring interface available" >&5
 $as_echo "$as_me: error: No performance monitoring interface available" >&2;}
    { (exit 1); exit 1; }; }
@@ -8668,6 +8680,9 @@ if test "$OS" = "aix"; then
       power5) PMAPI="/usr/pmapi" ;;
       power6) PMAPI="/usr/pmapi" ;;
       esac
+   else
+	PMAPI="$pmapi"
+   fi
       PMINIT=""
       LIBS="-L$PMAPI/lib -lpmapi"
       CPPFLAGS="$CPPFLAGS -I$PMAPI/include"
@@ -8820,9 +8835,6 @@ fi
 fi
 
    else
-	PMAPI="$pmapi"
-   fi
-else
       case "$pmapi" in
          default) ;;
          *)
@@ -9033,7 +9045,7 @@ $as_echo "$as_me: error: The bitmode you specified is not supported" >&2;}
 		    else
 		    MAKEVER="$OS"-pfm-"$CPU"
 		 fi ;;
-            opteron|core|core2|i7|atom|em64t|p3)
+            opteron|core|core2|i7|atom|p3)
 		if test "$arch" = "x86_64"; then
 			MAKEVER="$OS"-perfctr-p3
 		else
@@ -9099,7 +9111,6 @@ case "$MAKEVER" in
     linux-perfctr-athlon);;
     linux-perfctr-p3);;
     linux-perfctr-p4);;
-    linux-perfctr-em64t);;
     solaris-ultra);;
     solaris-ultra-64bit);;
     solaris-niagara2|solaris-niagara2-32bit);;
@@ -9702,7 +9713,7 @@ elif test "$MAKEVER" = "bgp"; then
    BGP_SYSDIR=/bgsys/drivers/ppcfloor
    BGP_GNU_LINUX_PATH='${BGP_SYSDIR}/gnu-linux'
    LDFLAGS='-L$(BGP_SYSDIR)/runtime/SPI -lSPI.cna'
-   CFLAGS='-D_BGP -g -gdwarf-2 -O2 -Wall -I. -I$(BGP_SYSDIR)/arch/include -DCOMP_VECTOR=_bgp_vectors'
+   CFLAGS='-g -gdwarf-2 -O2 -Wall -I. -I$(BGP_SYSDIR)/arch/include -DCOMP_VECTOR=_bgp_vectors'
    # Some nice flags to add to CFLAGS when debugging
    #CFLAGS='$(CFLAGS) -DDEBUG -DMPX_DEBUG -DMPX_DEBUG_TIMER'
    FFLAGS='-g -gdwarf-2 -O2 -Wall -I. -Dlinux'

@@ -4,7 +4,7 @@
 
 /* 
 * File:    extras.c
-* CVS:     $Id: extras.c,v 1.159 2009/12/18 20:24:24 terpstra Exp $
+* CVS:     $Id: extras.c,v 1.159.2.3 2010/04/29 02:32:15 terpstra Exp $
 * Author:  Philip Mucci
 *          mucci@cs.utk.edu
 * Mods:    dan terpstra
@@ -460,7 +460,7 @@ int _papi_hwi_start_signal(int signal, int need_context, int cidx)
    action.sa_flags = SA_RESTART;
    action.sa_sigaction = (void (*)(int, siginfo_t *, void *)) _papi_hwd[cidx]->dispatch_timer;
    if (need_context)
-#if (defined(_BGL) /*|| defined (_BGP)*/)
+#if (defined(_BGL) /*|| defined (__bgp__)*/)
      action.sa_flags |= SIGPWR;
 #else
      action.sa_flags |= SA_SIGINFO;
@@ -562,32 +562,48 @@ int _papi_hwi_native_name_to_code(char *in, int *out)
 	char name[PAPI_HUGE_STR_LEN]; /* make sure it's big enough */
 	unsigned int i, j;
 
-	for (j=0,i = 0 | PAPI_NATIVE_MASK;j<papi_num_components; j++,i = 0 | PAPI_NATIVE_MASK) {
+	
+	for ( j = 0, i = 0 | PAPI_NATIVE_MASK; j<papi_num_components; j++, i = 0 | PAPI_NATIVE_MASK )
+	{
 		/* first check each component for name_to_code */
 		if (vector_find_dummy( (void*) _papi_hwd[j]->ntv_name_to_code, NULL) == NULL)
+		{
+			/* if ntv_name_to_code is set and != NULL */
 		  retval = _papi_hwd[j]->ntv_name_to_code(in, (unsigned *)out);
-		else {
+		}
+		else 
+		{
 			_papi_hwd[j]->ntv_enum_events(&i, PAPI_ENUM_FIRST);
 			_papi_hwi_lock(INTERNAL_LOCK);
-			do {
+			
+			do 
+			{
 				retval = _papi_hwd[j]->ntv_code_to_name(i, name, sizeof(name));
 /*				printf("name =|%s|\ninput=|%s|\n", name, in); */
-				if (retval == PAPI_OK) {
-					if (strcasecmp(name, in) == 0) {
+				if (retval == PAPI_OK) 
+				{
+					if (strcasecmp(name, in) == 0) 
+					{
 						*out = i | PAPI_COMPONENT_MASK(j);;
 						break;
-					} else {
+					} 
+					else
 						retval = PAPI_ENOEVNT;
 					}
-				} else {
+				else 
+				{
 					*out = 0;
 					retval = PAPI_ENOEVNT;
 					break;
 				}
-			} while ((_papi_hwd[j]->ntv_enum_events(&i, PAPI_ENUM_EVENTS) == PAPI_OK));
+			} 
+			while ( ( _papi_hwd[j]->ntv_enum_events( &i, PAPI_ENUM_EVENTS ) == PAPI_OK ) );
+			
 			_papi_hwi_unlock(INTERNAL_LOCK);
-			if (retval == PAPI_OK) return(retval);
 		}
+		
+		if ( retval == PAPI_OK ) 
+			return( retval );
 	}
 	return (retval);
 }
@@ -675,7 +691,7 @@ int _papi_hwi_get_native_event_info(unsigned int EventCode, PAPI_event_info_t * 
 	return (PAPI_ENOEVNT);
 }
 
-#if (!defined(HAVE_FFSLL) || defined(_BGP))
+#if (!defined(HAVE_FFSLL) || defined(__bgp__))
 /* find the first set bit in long long */
 
 int ffsll(long long lli)

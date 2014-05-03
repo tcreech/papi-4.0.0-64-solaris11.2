@@ -1,6 +1,6 @@
 /* 
 * File:    multiplex1_pthreads.c
-* CVS:     $Id: multiplex1_pthreads.c,v 1.49 2009/11/11 18:47:42 bsheely Exp $
+* CVS:     $Id: multiplex1_pthreads.c,v 1.49.4.1 2010/04/29 02:30:46 terpstra Exp $
 * Author:  Philip Mucci
 *          mucci@cs.utk.edu
 * Mods:    <your name here>
@@ -12,28 +12,27 @@
 #include <pthread.h>
 #include "papi_test.h"
 
-unsigned int power6_preset_PAPI_events[PAPI_MPX_DEF_DEG] = {
-   PAPI_FP_INS, PAPI_TOT_CYC, PAPI_L1_DCM, PAPI_L1_ICM, 0 };
-unsigned int preset_PAPI_events[PAPI_MPX_DEF_DEG] = {
-   PAPI_FP_INS, PAPI_TOT_INS, PAPI_L1_DCM, PAPI_L1_ICM, 0 };
-static unsigned int PAPI_events[PAPI_MPX_DEF_DEG] = { 0, };
+int solaris_preset_PAPI_events[PAPI_MPX_DEF_DEG] = {
+  PAPI_BR_MSP, PAPI_TOT_CYC, PAPI_L2_TCM, PAPI_L1_ICM, 0
+};
+int power6_preset_PAPI_events[PAPI_MPX_DEF_DEG] = {
+	PAPI_FP_INS, PAPI_TOT_CYC, PAPI_L1_DCM, PAPI_L1_ICM, 0
+};
+int preset_PAPI_events[PAPI_MPX_DEF_DEG] = {
+	PAPI_FP_INS, PAPI_TOT_INS, PAPI_L1_DCM, PAPI_L1_ICM, 0
+};
+static int PAPI_events[PAPI_MPX_DEF_DEG] = { 0, };
 static int PAPI_events_len = 0;
 
 #define CPP_TEST_FAIL(string, retval) test_fail(__FILE__, __LINE__, string, retval)
 
-void init_papi_pthreads(unsigned int *out_events, int *len)
+void
+init_papi_pthreads( int *out_events, int *len )
 {
    int retval;
    int i, real_len = 0;
-   unsigned int *in_events = preset_PAPI_events;
+	int *in_events = preset_PAPI_events;
    const PAPI_hw_info_t *hw_info;
-
-   /* Initialize the library */
-   retval = PAPI_library_init(PAPI_VER_CURRENT);
-   if (retval != PAPI_VER_CURRENT)
-      CPP_TEST_FAIL("PAPI_library_init", retval);
-
-   hw_info = PAPI_get_hardware_info();
 
    /* Initialize the library */
    retval = PAPI_library_init(PAPI_VER_CURRENT);
@@ -43,6 +42,10 @@ void init_papi_pthreads(unsigned int *out_events, int *len)
    hw_info = PAPI_get_hardware_info();
    if (hw_info == NULL)
       test_fail(__FILE__, __LINE__, "PAPI_get_hardware_info", 2);
+
+	if ( strstr( hw_info->model_string, "UltraSPARC" ) ) {
+	  in_events = solaris_preset_PAPI_events;
+        }
 
    if (strcmp(hw_info->model_string, "POWER6") == 0) {
       in_events = power6_preset_PAPI_events;
@@ -108,7 +111,7 @@ int do_pthreads(void *(*fn) (void *))
       pthread_join(id[i], NULL);
 
    pthread_attr_destroy(&attr);
-
+	pthread_exit( NULL );
    return (SUCCESS);
 }
 
@@ -116,8 +119,12 @@ int do_pthreads(void *(*fn) (void *))
 
 void *case1_pthreads(void *arg)
 {
+	( void ) arg;			 /*unused */
    int retval, i, EventSet = PAPI_NULL;
    long long values[2];
+
+	if ( ( retval = PAPI_register_thread(  ) ) != PAPI_OK )
+		test_fail( __FILE__, __LINE__, "PAPI_register_thread", retval );
 
    if ((retval = PAPI_create_eventset(&EventSet)) != PAPI_OK)
       test_fail(__FILE__, __LINE__, "PAPI_create_eventset", retval);
@@ -153,6 +160,9 @@ void *case1_pthreads(void *arg)
    if ((retval = PAPI_cleanup_eventset(EventSet)) != PAPI_OK)   /* JT */
       test_fail(__FILE__, __LINE__, "PAPI_cleanup_eventset", retval);
 
+	if ( ( retval = PAPI_unregister_thread(  ) ) != PAPI_OK )
+		test_fail( __FILE__, __LINE__, "PAPI_unregister_thread", retval );
+
    return ((void *) SUCCESS);
 }
 
@@ -160,8 +170,12 @@ void *case1_pthreads(void *arg)
 
 void *case2_pthreads(void *arg)
 {
+	( void ) arg;			 /*unused */
    int retval, i, EventSet = PAPI_NULL;
    long long values[2];
+
+	if ( ( retval = PAPI_register_thread(  ) ) != PAPI_OK )
+		test_fail( __FILE__, __LINE__, "PAPI_register_thread", retval );
 
    if ((retval = PAPI_create_eventset(&EventSet)) != PAPI_OK)
       test_fail(__FILE__, __LINE__, "PAPI_create_eventset", retval);
@@ -208,6 +222,9 @@ void *case2_pthreads(void *arg)
    if ((retval = PAPI_cleanup_eventset(EventSet)) != PAPI_OK)   /* JT */
       test_fail(__FILE__, __LINE__, "PAPI_cleanup_eventset", retval);
 
+	if ( ( retval = PAPI_unregister_thread(  ) ) != PAPI_OK )
+		test_fail( __FILE__, __LINE__, "PAPI_unregister_thread", retval );
+
    return ((void *) SUCCESS);
 }
 
@@ -215,8 +232,12 @@ void *case2_pthreads(void *arg)
 
 void *case3_pthreads(void *arg)
 {
+	( void ) arg;			 /*unused */
    int retval, i, EventSet = PAPI_NULL;
    long long values[2];
+
+	if ( ( retval = PAPI_register_thread(  ) ) != PAPI_OK )
+		test_fail( __FILE__, __LINE__, "PAPI_register_thread", retval );
 
    if ((retval = PAPI_create_eventset(&EventSet)) != PAPI_OK)
       test_fail(__FILE__, __LINE__, "PAPI_create_eventset", retval);
@@ -255,6 +276,9 @@ void *case3_pthreads(void *arg)
    if ((retval = PAPI_cleanup_eventset(EventSet)) != PAPI_OK)   /* JT */
       test_fail(__FILE__, __LINE__, "PAPI_cleanup_eventset", retval);
 
+	if ( ( retval = PAPI_unregister_thread(  ) ) != PAPI_OK )
+		test_fail( __FILE__, __LINE__, "PAPI_unregister_thread", retval );
+
    return ((void *) SUCCESS);
 }
 
@@ -262,9 +286,13 @@ void *case3_pthreads(void *arg)
 
 void *case4_pthreads(void *arg)
 {
+	( void ) arg;			 /*unused */
    int retval, i, EventSet = PAPI_NULL;
    long long values[4];
    char out[PAPI_MAX_STR_LEN];
+
+	if ( ( retval = PAPI_register_thread(  ) ) != PAPI_OK )
+		test_fail( __FILE__, __LINE__, "PAPI_register_thread", retval );
 
    if ((retval = PAPI_create_eventset(&EventSet)) != PAPI_OK)
       test_fail(__FILE__, __LINE__, "PAPI_create_eventset", retval);
@@ -305,6 +333,9 @@ void *case4_pthreads(void *arg)
 
    if ((retval = PAPI_cleanup_eventset(EventSet)) != PAPI_OK)   /* JT */
       test_fail(__FILE__, __LINE__, "PAPI_cleanup_eventset", retval);
+
+	if ( ( retval = PAPI_unregister_thread(  ) ) != PAPI_OK )
+		test_fail( __FILE__, __LINE__, "PAPI_unregister_thread", retval );
 
    return ((void *) SUCCESS);
 }

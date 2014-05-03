@@ -86,7 +86,7 @@ extern int TESTS_QUIET;         /* Declared in test_utils.c */
 #elif defined(_BGL)
    static char *native_name[] = { "BGL_UPC_PU0_PREF_STREAM_HIT", "BGL_PAPI_TIMEBASE", "BGL_UPC_PU1_PREF_STREAM_HIT", NULL };
 
-#elif defined(_BGP)
+#elif defined(__bgp__)
    static char *native_name[] = { "PNE_BGP_PU0_JPIPE_LOGICAL_OPS", "PNE_BGP_PU0_JPIPE_LOGICAL_OPS", "PNE_BGP_PU2_IPIPE_INSTRUCTIONS", NULL };
 
 #else

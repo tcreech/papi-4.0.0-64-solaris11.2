@@ -1,6 +1,6 @@
 /*
  * File:    linux.c
- * CVS:     $Id: papi_vector.c,v 1.22 2009/12/18 20:24:24 terpstra Exp $
+ * CVS:     $Id: papi_vector.c,v 1.22.2.1 2010/04/29 02:32:15 terpstra Exp $
  * Author:  Kevin London
  *          london@cs.utk.edu
  * Mods:    Haihang You
@@ -88,7 +88,7 @@ long long vec_dummy_get_real_cycles (void)
   return((long long)cyc);
 }
 
-#if ((defined _BGL) || (defined _BGP))
+#if ((defined _BGL) || (defined __bgp__))
    #include <stdlib.h>
    #include <sys/time.h>
    #include <sys/resource.h>
@@ -97,7 +97,7 @@ long long vec_dummy_get_real_cycles (void)
 long long vec_dummy_get_virt_usec (const hwd_context_t *zero)
 {
   long long retval;
-#if ((defined _BGL) || (defined _BGP))
+#if ((defined _BGL) || (defined __bgp__))
       struct rusage ruse;
       getrusage(RUSAGE_SELF, &ruse);
       retval = (long long)(ruse.ru_utime.tv_sec * 1000000 + ruse.ru_utime.tv_usec);

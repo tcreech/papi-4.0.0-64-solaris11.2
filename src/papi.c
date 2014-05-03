@@ -4,7 +4,7 @@
 
 /* 
 * File:    papi.c
-* CVS:     $Id: papi.c,v 1.337 2009/12/18 20:24:24 terpstra Exp $
+* CVS:     $Id: papi.c,v 1.337.2.2 2010/04/29 02:32:15 terpstra Exp $
 * Author:  Philip Mucci
 *          mucci@cs.utk.edu
 * Mods:    dan terpstra
@@ -1050,7 +1050,7 @@ int PAPI_reset(int EventSet)
 
       }
    } else {
-#ifdef _BGP
+#ifdef __bgp__
    //  For BG/P, we always want to reset the 'real' hardware counters.  The counters
    //  can be controlled via multiple interfaces, and we need to ensure that the values
    //  are truly zero...
@@ -1349,13 +1349,10 @@ int PAPI_set_multiplex(int EventSet)
    if (ESI == NULL)
       papi_return(PAPI_ENOEVST);
 
-   /* if the eventset has no index and no events, return OK
-      otherwise return NOCMP */
+   /* if the eventset has no index return NOCMP */
    cidx = valid_ESI_component(ESI);
-   if (cidx < 0) {
-       if (ESI->NumberOfEvents) papi_return(cidx);
-       papi_return(PAPI_OK);
-   }
+   if (cidx < 0) papi_return(cidx);
+
    if ((ret = mpx_check(EventSet)) != PAPI_OK)
 	papi_return(ret);
 

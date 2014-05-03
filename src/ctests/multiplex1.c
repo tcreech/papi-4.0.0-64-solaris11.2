@@ -1,6 +1,6 @@
 /* 
 * File:    multiplex.c
-* CVS:     $Id: multiplex1.c,v 1.50 2009/09/10 20:19:48 terpstra Exp $
+* CVS:     $Id: multiplex1.c,v 1.50.6.1 2010/04/29 02:30:46 terpstra Exp $
 * Author:  Philip Mucci
 *          mucci@cs.utk.edu
 * Mods:    <your name here>
@@ -14,20 +14,26 @@
 
 /* Event to use in all cases; initialized in init_papi() */
 
-unsigned int power6_preset_PAPI_events[PAPI_MPX_DEF_DEG] = {
-   PAPI_FP_INS, PAPI_TOT_CYC, PAPI_L1_DCM, PAPI_L1_ICM, 0 };
-unsigned int preset_PAPI_events[PAPI_MPX_DEF_DEG] = {
-   PAPI_FP_INS, PAPI_TOT_INS, PAPI_L1_DCM, PAPI_L1_ICM, 0 };
-static unsigned int PAPI_events[PAPI_MPX_DEF_DEG] = { 0, };
+int solaris_preset_PAPI_events[PAPI_MPX_DEF_DEG] = {
+	PAPI_BR_MSP, PAPI_TOT_CYC, PAPI_L2_TCM, PAPI_L1_ICM, 0
+};
+int power6_preset_PAPI_events[PAPI_MPX_DEF_DEG] = {
+	PAPI_FP_INS, PAPI_TOT_CYC, PAPI_L1_DCM, PAPI_L1_ICM, 0
+};
+int preset_PAPI_events[PAPI_MPX_DEF_DEG] = {
+	PAPI_FP_INS, PAPI_TOT_INS, PAPI_L1_DCM, PAPI_L1_ICM, 0
+};
+static int PAPI_events[PAPI_MPX_DEF_DEG] = { 0, };
 static int PAPI_events_len = 0;
 
 #define CPP_TEST_FAIL(string, retval) test_fail(__FILE__, __LINE__, string, retval)
 
-void init_papi(unsigned int *out_events, int *len)
+void
+init_papi( int *out_events, int *len )
 {
    int retval;
    int i, real_len = 0;
-   unsigned int *in_events = preset_PAPI_events;
+	int *in_events = preset_PAPI_events;
    const PAPI_hw_info_t *hw_info;
 
    /* Initialize the library */
@@ -38,6 +44,10 @@ void init_papi(unsigned int *out_events, int *len)
    hw_info = PAPI_get_hardware_info();
    if (hw_info == NULL)
       test_fail(__FILE__, __LINE__, "PAPI_get_hardware_info", 2);
+
+	if ( strstr( hw_info->model_string, "UltraSPARC" ) ) {
+		in_events = solaris_preset_PAPI_events;
+	}
 
    if (strcmp(hw_info->model_string, "POWER6") == 0) {
       in_events = power6_preset_PAPI_events;

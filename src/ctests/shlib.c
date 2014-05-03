@@ -1,6 +1,6 @@
 /* 
 * File:    profile.c
-* CVS:     $Id: shlib.c,v 1.18 2009/09/10 20:19:49 terpstra Exp $
+* CVS:     $Id: shlib.c,v 1.18.6.2 2010/01/27 00:27:26 jagode Exp $
 * Author:  Philip Mucci
 *          mucci@cs.utk.edu
 * Mods:    <your name here>
@@ -59,49 +59,25 @@ int main(int argc, char **argv)
 
 #ifndef NO_DLFCN
    {
-     char *libname = 
-     "libpapi.so";
-     char *libname2 = 
-     "libpapi64.so";
-     char *_libname;
+     char *_libname =
+	   "libm.so";
      void *handle ;
-/*
-     void *handle = dlopen("libm.so", RTLD_LAZY);
-*/
-     int (*num_hwctrs)(void);
+	 double (*pow)(double,double);
      int oldcount;
-     int my_dlerror = 0;
-
-RETRY:
-     if ( !my_dlerror ){
-        printf("\nLoading %s with dlopen().\n",libname);
-        _libname = libname;
-     }
-     else{
-        printf("\nLoading %s with dlopen().\n",libname2);
-        _libname = libname2;
-     }
 
      handle = dlopen (_libname, RTLD_NOW);
      if (!handle) {
 	 printf("dlopen: %s\n",dlerror());
-          if ( !my_dlerror ){
-             my_dlerror = 1;
-	     printf("Trying again.");
-             goto RETRY;
-          }
           printf("Did you forget to set the environmental variable LIBPATH (in AIX) or LD_LIBRARY_PATH (in linux) ?\n");
           test_fail(__FILE__, __LINE__, "dlopen", 1);
      }
      
-     printf("Looking up PAPI_num_counters() \n");
-     num_hwctrs = ( int (*) (void)) dlsym(handle, "PAPI_num_counters");
-     if (num_hwctrs == NULL)  {
+	 pow = (double(*)(double,double)) dlsym(handle, "pow");
+	 if (pow == NULL) {
        printf("dlsym: %s \n", dlerror());
        test_fail(__FILE__, __LINE__, "dlsym", 1);
      }
-     
-     printf ("There are %d hardware counters \n", (*num_hwctrs)());
+	 printf("2^2 = %lf \n",(*pow)(2,2));
  
    oldcount = shinfo->count;
 

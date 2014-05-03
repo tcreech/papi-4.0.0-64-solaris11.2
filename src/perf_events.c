@@ -1,6 +1,6 @@
 /*
 * File:    perf_events.c
-* CVS:     $Id: perf_events.c,v 1.18 2010/01/14 15:48:00 terpstra Exp $
+* CVS:     $Id: perf_events.c,v 1.18.2.1 2010/01/27 22:26:42 jagode Exp $
 * Author:  Corey Ashford
 *          cjashfor@us.ibm.com
 *          - based upon perfmon.c written by -
@@ -76,6 +76,7 @@ extern papi_vector_t _papi_pe_vector;
 
 extern int _papi_pfm_setup_presets(char *name, int type);
 extern int _papi_pfm_ntv_enum_events(unsigned int *EventCode, int modifier);
+extern int _papi_pfm_ntv_name_to_code(char *ntv_name, unsigned int *EventCode);
 extern int _papi_pfm_ntv_code_to_name(unsigned int EventCode, char *ntv_name, int len);
 extern int _papi_pfm_ntv_code_to_descr(unsigned int EventCode, char *ntv_descr, int len);
 extern int _papi_pfm_ntv_code_to_bits(unsigned int EventCode, hwd_register_t *bits);
@@ -2014,8 +2015,8 @@ int _papi_pe_init_substrate (int cidx)
     }
   SUBDBG ("pfm_get_num_events: %d\n", ncnt);
   MY_VECTOR.cmp_info.num_native_events = ncnt;
-  strcpy (MY_VECTOR.cmp_info.name, "$Id: perf_events.c,v 1.18 2010/01/14 15:48:00 terpstra Exp $");
-  strcpy (MY_VECTOR.cmp_info.version, "$Revision: 1.18 $");
+  strcpy (MY_VECTOR.cmp_info.name, "$Id: perf_events.c,v 1.18.2.1 2010/01/27 22:26:42 jagode Exp $");
+  strcpy (MY_VECTOR.cmp_info.version, "$Revision: 1.18.2.1 $");
   sprintf (buf, "%08x", version);
 
   pfm_get_num_counters ((unsigned int *) &MY_VECTOR.cmp_info.num_cntrs);
@@ -3383,6 +3384,7 @@ papi_vector_t _papi_pe_vector = {
     .allocate_registers =	_papi_pe_allocate_registers,
     .write =	_papi_pe_write,
     .ntv_enum_events =	_papi_pfm_ntv_enum_events,
+	.ntv_name_to_code = _papi_pfm_ntv_name_to_code,
     .ntv_code_to_name =	_papi_pfm_ntv_code_to_name,
     .ntv_code_to_descr =	_papi_pfm_ntv_code_to_descr,
     .ntv_code_to_bits =	_papi_pfm_ntv_code_to_bits,
