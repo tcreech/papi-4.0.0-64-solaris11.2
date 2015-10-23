@@ -3,8 +3,9 @@
 * CVS:     $Id: README,v 1.9 2009/09/10 20:19:05 terpstra Exp $
 * Author:  Philip Mucci
 *          mucci@cs.utk.edu
-* Mods:    <your name here>
-*          <your email address>
+* Mods:    Resurrection of PAPI 4.0.0p3 for Sun Niagara2 on Oracle Solaris 11.2.
+*          Tim Creech
+*          tcreech@umd.edu
 */  
 
 This directory contains:
